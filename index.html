@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <!-- Добавлен тег viewport для мобильных устройств -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Графический калькулятор – Advanced Graphs</title>
+  <!-- Шрифт Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* Общие стили */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #ECECEC;
+      color: #3B4A58;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #3B4A58;
+      color: #fff;
+      padding: 15px 10px;
+    }
+    .header-left { text-align: left; }
+    .header-left .team-name { font-size: 18px; font-weight: 600; }
+    .header-center { text-align: center; flex: 1; }
+    .header-center h1 { margin: 0; font-size: 22px; }
+    .header-right { text-align: right; }
+    .header-right nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 10px;
+      font-weight: 600;
+      transition: color 0.3s;
+      font-size: 14px;
+    }
+    .header-right nav a:hover { color: #6495ED; }
+    
+    /* Основной контейнер */
+    #container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px;
+    }
+    #leftPanel, #rightPanel {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #708090;
+      flex: 1 1 300px;
+    }
+    #rightPanel { max-width: 350px; }
+    h2, h3 { margin-top: 0; color: #3B4A58; }
+    
+    /* Стили калькулятора */
+    #calculator { margin-bottom: 10px; }
+    #display {
+      width: 100%;
+      height: 40px;
+      font-size: 16px;
+      padding: 8px 12px;
+      border: 1px solid #708090;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      text-align: right;
+    }
+    #keyboard { }
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .calc-row .btn {
+      flex: 1 1 22%;
+      margin: 2px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    .btn {
+      border: none;
+      border-radius: 4px;
+      background-color: #6B8E23;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn:hover { background-color: #556B2F; transform: scale(1.05); }
+    
+    /* Секция кусочной функции */
+    #piecewiseSection {
+      background-color: #F7F7F7;
+      border: 1px solid #708090;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .pieceRow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .pieceRow input, .pieceRow select {
+      padding: 4px;
+      font-size: 14px;
+      border: 1px solid #708090;
+      border-radius: 4px;
+      margin: 2px 0;
+    }
+    .deletePiece {
+      background-color: #2E8B57;
+      border: none;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+      font-size: 14px;
+    }
+    .deletePiece:hover { background-color: #1E6F41; }
+    
+    /* Область графика */
+    #graphContainer {
+      position: relative;
+      margin: 10px;
+      background-color: #fff;
+      border: 2px solid #708090;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #graphCanvas {
+      display: block;
+      width: 100%;
+      height: 300px;
+      background-color: #fff;
+      cursor: grab;
+    }
+    #graphCanvas:active { cursor: grabbing; }
+    #zoomControls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(112, 128, 144, 0.9);
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    #zoomControls button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background-color: #6B8E23;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 2px;
+    }
+    #zoomControls button:hover { background-color: #556B2F; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    table, th, td { border: 1px solid #708090; }
+    th, td { padding: 6px; text-align: center; }
+    th { background-color: #6495ED; color: #fff; }
+    
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #3B4A58;
+      color: #fff;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    /* Дополнительная информация */
+    #infoSection {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #708090;
+      font-size: 14px;
+    }
+    #infoSection h2 { color: #6B8E23; font-size: 18px; }
+    #infoSection p, #infoSection ul { line-height: 1.6; font-size: 14px; }
+    #infoSection li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left"><span class="team-name">GRENNORO</span></div>
+    <div class="header-center"><h1>Графический калькулятор</h1></div>
+    <div class="header-right">
+      <nav>
+        <a href="#graphContainer">График</a>
+        <a href="#rightPanel">Справка</a>
+        <a href="#infoSection">Инфо</a>
+      </nav>
+    </div>
+  </header>
+  
+  <div id="container">
+    <!-- Левая панель -->
+    <div id="leftPanel">
+      <div id="calculator">
+        <input type="text" id="display" placeholder="Введите функцию f(x)" />
+        <div id="keyboard">
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('7')">7</button>
+            <button class="btn" onclick="appendToDisplay('8')">8</button>
+            <button class="btn" onclick="appendToDisplay('9')">9</button>
+            <button class="btn" onclick="appendToDisplay('+')">+</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('4')">4</button>
+            <button class="btn" onclick="appendToDisplay('5')">5</button>
+            <button class="btn" onclick="appendToDisplay('6')">6</button>
+            <button class="btn" onclick="appendToDisplay('-')">-</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('1')">1</button>
+            <button class="btn" onclick="appendToDisplay('2')">2</button>
+            <button class="btn" onclick="appendToDisplay('3')">3</button>
+            <button class="btn" onclick="appendToDisplay('*')">*</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('0')">0</button>
+            <button class="btn" onclick="appendToDisplay('(')">(</button>
+            <button class="btn" onclick="appendToDisplay(')')">)</button>
+            <button class="btn" onclick="clearDisplay()">C</button>
+          </div>
+          <!-- Ряд с делением -->
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('/')">/</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('x')">x</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('^')">^</button>
+            <button class="btn" onclick="appendToDisplay('sin(')">sin</button>
+            <button class="btn" onclick="appendToDisplay('cos(')">cos</button>
+            <button class="btn" onclick="appendToDisplay('tan(')">tan</button>
+          </div>
+          <div class="calc-row">
+            <button class="btn" onclick="appendToDisplay('log(')">log</button>
+            <button class="btn" onclick="appendToDisplay('sqrt(')">sqrt</button>
+            <button class="btn" onclick="appendToDisplay('abs(')">abs</button>
+          </div>
+        </div>
+        <button class="btn" style="width:100%; margin-top:10px;" onclick="plotFunction()">Построить</button>
+      </div>
+      
+      <div id="piecewiseSection">
+        <h3>Кусочная функция</h3>
+        <button class="btn" style="width:100%;" onclick="addPiece()">Добавить кусок</button>
+        <div id="piecewiseContainer"></div>
+        <p style="font-size:12px; color:#708090; margin-top:5px;">
+          Если заданы куски, будет построена составная функция. Для каждого участка задайте формулу и условие для x.
+        </p>
+      </div>
+      
+      <div id="intersections">
+        <h2>Пересечения с линией y = m</h2>
+        <div>
+          <button class="btn" onclick="findIntersectionsForM('custom')">Свой m</button>
+          <button class="btn" onclick="findIntersectionsForM(1)">1</button>
+          <button class="btn" onclick="findIntersectionsForM(2)">2</button>
+          <button class="btn" onclick="findIntersectionsForM(3)">3</button>
+          <button class="btn" onclick="findIntersectionsForM(4)">4</button>
+          <button class="btn" onclick="findIntersectionsForM(5)">5</button>
+          <button class="btn" onclick="findIntersectionsForM(6)">6</button>
+          <button class="btn" onclick="findIntersectionsForM(7)">7</button>
+          <button class="btn" onclick="findIntersectionsForM(8)">8</button>
+          <button class="btn" onclick="findIntersectionsForM(9)">9</button>
+        </div>
+        <div>
+          <button class="btn" onclick="setM()">Задать y = m</button>
+          <div id="intersectionResults"></div>
+        </div>
+        <div id="intersectionResults"></div>
+      </div>
+    </div>
+    
+    <!-- Правая панель -->
+    <div id="rightPanel">
+      <h2>Справочная информация</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Функция</th>
+            <th>Описание</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>f(x) = x²</td>
+            <td>Парабола: направление ветвей зависит от знака коэффициента при x² (a &gt; 0 – вверх, a &lt; 0 – вниз).</td>
+          </tr>
+          <tr>
+            <td>f(x) = 1/x</td>
+            <td>Гипербола: имеет разрыв при x = 0; асимптоты описывают поведение при x → ±∞.</td>
+          </tr>
+          <tr>
+            <td>f(x) = sin(x)</td>
+            <td>Синусоида: периодическая функция с амплитудой 1 и периодом 2π.</td>
+          </tr>
+          <tr>
+            <td>f(x) = cos(x)</td>
+            <td>Косинусоида: периодическая функция, сдвинутая по фазе относительно синуса.</td>
+          </tr>
+          <tr>
+            <td>f(x) = tan(x)</td>
+            <td>Тангенс: функция с разрывами, период π.</td>
+          </tr>
+          <tr>
+            <td>f(x) = log(x)</td>
+            <td>Логарифмическая функция: определена для x &gt; 0, растёт медленно.</td>
+          </tr>
+          <tr>
+            <td>f(x) = sqrt(x)</td>
+            <td>Квадратный корень: возвращает неотрицательное значение.</td>
+          </tr>
+          <tr>
+            <td>f(x) = abs(x)</td>
+            <td>Модуль: возвращает абсолютное значение числа.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Область графика -->
+  <div id="graphContainer">
+    <canvas id="graphCanvas"></canvas>
+    <div id="zoomControls">
+      <button onclick="zoomIn()">+</button>
+      <button onclick="zoomOut()">−</button>
+      <button onclick="resetView()">⟳</button>
+    </div>
+  </div>
+  
+  <!-- Дополнительная информация -->
+  <div id="infoSection">
+    <h2>О математических графиках и функциях</h2>
+    <p>
+      Математический график – это визуальное представление функции, позволяющее понять её поведение, свойства и взаимосвязь переменных. График помогает:
+    </p>
+    <ul>
+      <li><strong>Находить корни уравнения:</strong> точки пересечения графика с осью x показывают, где функция равна нулю.</li>
+      <li><strong>Определять интервалы возрастания и убывания:</strong> по наклону графика можно судить о том, где функция растёт или падает.</li>
+      <li><strong>Выявлять экстремумы:</strong> анализ локальных и глобальных максимумов и минимумов.</li>
+      <li><strong>Исследовать асимптотическое поведение:</strong> асимптоты и разрывы помогают понять пределы функции при стремлении переменной к ±∞.</li>
+    </ul>
+    <p>
+      <strong>Парабола</strong> – это лишь один из многих типов функций. Для функции вида <code>f(x)=ax²+bx+c</code>:
+    </p>
+    <ul>
+      <li><em>Коэффициент a:</em> определяет направление ветвей (при <code>a &gt; 0</code> – вверх, при <code>a &lt; 0</code> – вниз).</li>
+      <li><em>Модуль a:</em> влияет на «ширину» параболы – чем больше |a|, тем уже график.</li>
+      <li>Коэффициенты <em>b</em> и <em>c</em> задают положение вершины и пересечение с осью y.</li>
+    </ul>
+    <p>
+      Помимо квадратичных функций, существуют:
+    </p>
+    <ul>
+      <li><strong>Линейные функции:</strong> <code>f(x)=kx+b</code></li>
+      <li><strong>Экспоненциальные функции:</strong> <code>f(x)=a^x</code></li>
+      <li><strong>Логарифмические функции:</strong> <code>f(x)=log(x)</code></li>
+      <li><strong>Тригонометрические функции:</strong> <code>f(x)=sin(x), cos(x), tan(x)</code></li>
+      <li><strong>Степенные функции:</strong> <code>f(x)=x^n</code></li>
+      <li><strong>Рациональные функции:</strong> отношения многочленов</li>
+      <li><strong>Гиперболические функции:</strong> аналоги тригонометрических</li>
+    </ul>
+    <p>
+      Графический анализ помогает находить точки пересечения, анализировать поведение функций и применять эти знания для решения практических задач.
+    </p>
+  </div>
+  
+  <footer>
+    &copy; 2025 Графический калькулятор. Все права защищены.
+  </footer>
+  
+  <script>
+    // Функция для отрисовки черной выколотой (hollow) точки
+    function drawHollowPoint(ctx, x, y, radius = 4, strokeColor = 'black', lineWidth = 2) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    }
+    
+    // Безопасная оценка currentFunction(x)
+    function safeFunctionEval(x) {
+      try {
+        return currentFunction(x);
+      } catch (e) {
+        return NaN;
+      }
+    }
+    
+    // Получение расширённого значения функции: если основное вычисление дает NaN, пытаемся вычислить пределы слева и справа
+    function getExtendedValue(x) {
+      let y = safeFunctionEval(x);
+      if (isFinite(y)) return y;
+      const eps = 1e-4;
+      let left = safeFunctionEval(x - eps);
+      let right = safeFunctionEval(x + eps);
+      if (isFinite(left) && isFinite(right) && Math.abs(left - right) < 1e-2) {
+        return Math.round(((left + right) / 2) * 100) / 100;
+      }
+      return NaN;
+    }
+    
+    let currentFunction = null;
+    let currentScale = 50;
+    let currentCenterX, currentCenterY;
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    let redrawRequested = false;
+    
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      if (currentCenterX === undefined || currentCenterY === undefined) {
+        currentCenterX = canvas.width / 2;
+        currentCenterY = canvas.height / 2;
+      }
+      redrawGraph();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    function requestRedraw() {
+      if (!redrawRequested) {
+        redrawRequested = true;
+        requestAnimationFrame(() => {
+          redrawGraph();
+          redrawRequested = false;
+        });
+      }
+    }
+    
+    function preprocessExpression(expr) {
+      expr = expr.trim();
+      expr = expr.replace(/^y\s*=/i, '');
+      expr = expr.replace(/^f\s*\(\s*x\s*\)\s*=/i, '');
+      expr = expr.replace(/(\d)([a-zA-Z(])/g, '$1*$2');
+      expr = expr.replace(/(\))([a-zA-Z\d])/g, '$1*$2');
+      let functions = ["abs", "sin", "cos", "tan", "log", "sqrt", "exp"];
+      functions.forEach(fn => {
+        expr = expr.replace(new RegExp(`\\b${fn}\\(`, "gi"), `Math.${fn}(`);
+      });
+      expr = expr.replace(/\bpow\s*\(/gi, "Math.pow(");
+      expr = expr.replace(/([a-zA-Z\d]+)\s*\^\s*([a-zA-Z\d]+)/g, "Math.pow($1,$2)");
+      return expr;
+    }
+    
+    function appendToDisplay(value) {
+      document.getElementById('display').value += value;
+    }
+    
+    function clearDisplay() {
+      document.getElementById('display').value = '';
+    }
+    
+    function addPiece() {
+      const container = document.getElementById('piecewiseContainer');
+      const pieceRow = document.createElement('div');
+      pieceRow.className = "pieceRow";
+      
+      const formulaInput = document.createElement('input');
+      formulaInput.type = "text";
+      formulaInput.placeholder = "Формула f(x)";
+      
+      const condDiv = document.createElement('div');
+      condDiv.className = "pieceCondition";
+      
+      const lowerLabel = document.createElement('label');
+      lowerLabel.textContent = "x ";
+      
+      const lowerSelect = document.createElement('select');
+      lowerSelect.innerHTML = `<option value="">Нет</option>
+                               <option value=">">&gt;</option>
+                               <option value=">=">&ge;</option>`;
+      
+      const lowerInput = document.createElement('input');
+      lowerInput.type = "number";
+      lowerInput.placeholder = "min";
+      lowerInput.style.width = "60px";
+      
+      const upperSelect = document.createElement('select');
+      upperSelect.innerHTML = `<option value="">Нет</option>
+                               <option value="<">&lt;</option>
+                               <option value="<=">&le;</option>`;
+      
+      const upperInput = document.createElement('input');
+      upperInput.type = "number";
+      upperInput.placeholder = "max";
+      upperInput.style.width = "60px";
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = "Удалить";
+      deleteBtn.className = "deletePiece";
+      deleteBtn.onclick = function() { pieceRow.remove(); };
+      
+      condDiv.appendChild(lowerLabel);
+      condDiv.appendChild(lowerSelect);
+      condDiv.appendChild(lowerInput);
+      condDiv.appendChild(document.createTextNode(" и "));
+      condDiv.appendChild(upperSelect);
+      condDiv.appendChild(upperInput);
+      
+      pieceRow.appendChild(formulaInput);
+      pieceRow.appendChild(condDiv);
+      pieceRow.appendChild(deleteBtn);
+      
+      container.appendChild(pieceRow);
+    }
+    
+    function plotFunction() {
+      let f;
+      const piecewiseContainer = document.getElementById("piecewiseContainer");
+      if (piecewiseContainer.children.length > 0) {
+        let pieces = [];
+        const rows = piecewiseContainer.getElementsByClassName("pieceRow");
+        for (let row of rows) {
+          const formula = row.querySelector("input[type='text']").value;
+          const selects = row.getElementsByTagName("select");
+          const inputs = row.getElementsByTagName("input");
+          const lowerOp = selects[0].value;
+          const upperOp = selects[1].value;
+          const lowerVal = inputs[1].value;
+          const upperVal = inputs[2].value;
+          if (!formula) continue;
+          let expr = preprocessExpression(formula);
+          try {
+            var pieceFunc = new Function("x", "return " + expr + ";");
+            pieceFunc(1);
+          } catch(e) {
+            alert("Ошибка в кусочке: " + e.message);
+            return;
+          }
+          pieces.push({
+            func: pieceFunc,
+            lowerOp: lowerOp,
+            lowerVal: parseFloat(lowerVal),
+            upperOp: upperOp,
+            upperVal: parseFloat(upperVal)
+          });
+        }
+        f = function(x) {
+          for (let piece of pieces) {
+            let condition = true;
+            if (piece.lowerOp && !isNaN(piece.lowerVal)) {
+              if (piece.lowerOp === ">") { condition = condition && (x > piece.lowerVal); }
+              else if (piece.lowerOp === ">=") { condition = condition && (x >= piece.lowerVal); }
+            }
+            if (piece.upperOp && !isNaN(piece.upperVal)) {
+              if (piece.upperOp === "<") { condition = condition && (x < piece.upperVal); }
+              else if (piece.upperOp === "<=") { condition = condition && (x <= piece.upperVal); }
+            }
+            if (condition) return piece.func(x);
+          }
+          return NaN;
+        };
+      } else {
+        const input = document.getElementById('display').value;
+        if (input.trim() === "") {
+          alert("Введите функцию!");
+          return;
+        }
+        let expression = preprocessExpression(input);
+        expression = expression.replace(/\^/g, "**");
+        try {
+          f = new Function("x", "return " + expression + ";");
+          f(1);
+        } catch(e) {
+          alert("Ошибка в функции: " + e.message);
+          return;
+        }
+      }
+      currentFunction = f;
+      requestRedraw();
+      document.getElementById("intersectionResults").innerHTML = "";
+    }
+    
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let scale = currentScale;
+      ctx.strokeStyle = "#708090";
+      ctx.lineWidth = 1;
+      
+      let startX = -currentCenterX / scale;
+      let endX = (canvas.width - currentCenterX) / scale;
+      for (let i = Math.floor(startX); i <= Math.ceil(endX); i++) {
+        if (Math.abs(i) > 1000) continue;
+        let x = currentCenterX + i * scale;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+        ctx.fillStyle = "#708090";
+        ctx.font = "12px Poppins";
+        ctx.fillText(i, x + 2, currentCenterY + 12);
+      }
+      
+      let startY = -(canvas.height - currentCenterY) / scale;
+      let endY = currentCenterY / scale;
+      for (let j = Math.floor(startY); j <= Math.ceil(endY); j++) {
+        if (Math.abs(j) > 1000) continue;
+        let y = currentCenterY - j * scale;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+        if(j !== 0) {
+          ctx.fillStyle = "#708090";
+          ctx.font = "12px Poppins";
+          ctx.fillText(j, currentCenterX + 4, y - 4);
+        }
+      }
+      
+      ctx.strokeStyle = "#708090";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, currentCenterY);
+      ctx.lineTo(canvas.width, currentCenterY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(currentCenterX, 0);
+      ctx.lineTo(currentCenterX, canvas.height);
+      ctx.stroke();
+    }
+    
+    function drawHorizontalLine(m) {
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 2;
+      let yPixel = currentCenterY - m * currentScale;
+      ctx.beginPath();
+      ctx.moveTo(0, yPixel);
+      ctx.lineTo(canvas.width, yPixel);
+      ctx.stroke();
+    }
+    
+    // Обнаружение устранимых разрывов по плотной сетке с группировкой кандидатов
+    function detectAndDrawRemovableDiscontinuities() {
+      if (!currentFunction) return;
+      const eps = 1e-4;
+      const tol = 1e-2;
+      
+      let xMin = (-currentCenterX) / currentScale;
+      let xMax = (canvas.width - currentCenterX) / currentScale;
+      let dx = (xMax - xMin) / (canvas.width * 10);
+      
+      let candidates = [];
+      for (let x = xMin; x <= xMax; x += dx) {
+         let val = safeFunctionEval(x);
+         if (!isFinite(val)) {
+           let ext = getExtendedValue(x);
+           if (isFinite(ext)) {
+             candidates.push({ x: x, ext: ext });
+           }
+         }
+      }
+      
+      // Группировка кандидатов по близости
+      candidates.sort((a, b) => a.x - b.x);
+      let merged = [];
+      let currentGroup = null;
+      for (let cand of candidates) {
+         if (!currentGroup) {
+             currentGroup = { x: cand.x, ext: cand.ext, count: 1 };
+         } else {
+             if (Math.abs(cand.x - currentGroup.x) < dx * 2) {
+                 currentGroup.x = (currentGroup.x * currentGroup.count + cand.x) / (currentGroup.count + 1);
+                 currentGroup.ext = (currentGroup.ext * currentGroup.count + cand.ext) / (currentGroup.count + 1);
+                 currentGroup.count++;
+             } else {
+                 merged.push(currentGroup);
+                 currentGroup = { x: cand.x, ext: cand.ext, count: 1 };
+             }
+         }
+      }
+      if (currentGroup) merged.push(currentGroup);
+      
+      for (let group of merged) {
+         let pixelX = currentCenterX + group.x * currentScale;
+         let pixelY = currentCenterY - group.ext * currentScale;
+         drawHollowPoint(ctx, pixelX, pixelY, 4, 'black', 2);
+      }
+    }
+    
+    // Поиск пересечений с прямой y = m
+    function countIntersections(m) {
+      let xMin = (-currentCenterX) / currentScale;
+      let xMax = (canvas.width - currentCenterX) / currentScale;
+      let dx = (xMax - xMin) / (canvas.width * 10);
+      let intersections = [];
+      let prevX = xMin;
+      let prevY = safeFunctionEval(prevX);
+      if (!isFinite(prevY)) {
+         prevY = getExtendedValue(prevX);
+      }
+      if (isFinite(prevY) && Math.abs(prevY - m) < 1e-2) {
+         intersections.push([prevX, prevY]);
+      }
+      for (let x = xMin + dx; x <= xMax; x += dx) {
+         let y = safeFunctionEval(x);
+         if (!isFinite(y)) {
+            y = getExtendedValue(x);
+         }
+         if (!isFinite(prevY) || !isFinite(y)) { prevX = x; prevY = y; continue; }
+         if ((prevY - m) * (y - m) < 0) {
+            let t = (m - prevY) / (y - prevY);
+            let xIntersection = prevX + t * (x - prevX);
+            let yIntersection = getExtendedValue(xIntersection);
+            intersections.push([xIntersection, yIntersection]);
+         } else if (Math.abs(y - m) < 1e-2) {
+            intersections.push([x, y]);
+         }
+         prevX = x;
+         prevY = y;
+      }
+      intersections = intersections.filter((item, index) => {
+         return intersections.findIndex(([xi]) => Math.abs(xi - item[0]) < dx * 2) === index;
+      });
+      return intersections;
+    }
+    
+    function findIntersectionsForM(m) {
+      if (!currentFunction) {
+        alert("Сначала постройте график функции.");
+        return;
+      }
+      if (m === "custom") {
+        let inputM = prompt("Введите значение m:");
+        m = parseFloat(inputM);
+        if (isNaN(m)) { alert("Неверное значение m."); return; }
+      }
+      drawHorizontalLine(m);
+      
+      let intersections = countIntersections(m);
+      
+      ctx.fillStyle = "#6495ED";
+      intersections.forEach(([x, y]) => {
+         let pixelX = currentCenterX + x * currentScale;
+         let pixelY = currentCenterY - y * currentScale;
+         let orig = safeFunctionEval(x);
+         if (!isFinite(orig)) {
+           drawHollowPoint(ctx, pixelX, pixelY, 4, 'black', 2);
+         } else {
+           ctx.beginPath();
+           ctx.arc(pixelX, pixelY, 4, 0, 2 * Math.PI);
+           ctx.fill();
+         }
+      });
+      
+      const resultDiv = document.getElementById("intersectionResults");
+      if (intersections.length === 0) {
+         resultDiv.innerHTML = "Нет точек пересечения для m = " + m;
+      } else {
+         let resultText = "Точки пересечения для m = " + m + ":<br>";
+         intersections.forEach(([x, y]) => {
+            resultText += "(" + x.toFixed(2) + ", " + y.toFixed(2) + ")<br>";
+         });
+         resultDiv.innerHTML = resultText;
+      }
+    }
+    
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+    canvas.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      dragStart.x = e.clientX;
+      dragStart.y = e.clientY;
+    });
+    canvas.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+         let dx = e.clientX - dragStart.x;
+         let dy = e.clientY - dragStart.y;
+         currentCenterX += dx;
+         currentCenterY += dy;
+         dragStart.x = e.clientX;
+         dragStart.y = e.clientY;
+         requestRedraw();
+      }
+    });
+    canvas.addEventListener('mouseup', () => { isDragging = false; });
+    canvas.addEventListener('mouseleave', () => { isDragging = false; });
+    
+    canvas.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      let zoomIntensity = 0.1;
+      let mouseX = e.offsetX;
+      let mouseY = e.offsetY;
+      let wheel = e.deltaY < 0 ? 1 : -1;
+      let zoom = Math.exp(wheel * zoomIntensity);
+      currentCenterX = mouseX - (mouseX - currentCenterX) * zoom;
+      currentCenterY = mouseY - (mouseY - currentCenterY) * zoom;
+      currentScale *= zoom;
+      requestRedraw();
+    });
+    
+    function zoomIn() {
+      let zoom = 1.2;
+      currentCenterX = canvas.width/2 - (canvas.width/2 - currentCenterX) * zoom;
+      currentCenterY = canvas.height/2 - (canvas.height/2 - currentCenterY) * zoom;
+      currentScale *= zoom;
+      requestRedraw();
+    }
+    function zoomOut() {
+      let zoom = 1/1.2;
+      currentCenterX = canvas.width/2 - (canvas.width/2 - currentCenterX) * zoom;
+      currentCenterY = canvas.height/2 - (canvas.height/2 - currentCenterY) * zoom;
+      currentScale *= zoom;
+      requestRedraw();
+    }
+    function resetView() {
+      currentScale = 50;
+      currentCenterX = canvas.width / 2;
+      currentCenterY = canvas.height / 2;
+      requestRedraw();
+    }
+    
+    let currentM = 0;
+    let isDraggingM = false;
+    const MOUSE_SENSITIVITY = 0.99;
+    canvas.addEventListener("mousedown", function(e) {
+      let yPixel = currentCenterY - currentM * currentScale;
+      if (Math.abs(e.offsetY - yPixel) < 10) {
+         isDraggingM = true;
+         isDragging = false;
+      }
+    });
+    canvas.addEventListener("mousemove", function(e) {
+      if (isDraggingM) {
+         let deltaY = e.movementY / currentScale;
+         currentM -= deltaY * MOUSE_SENSITIVITY;
+         updateIntersectionInfo();
+         requestRedraw();
+      }
+    });
+    canvas.addEventListener("mouseup", function() { isDraggingM = false; });
+    canvas.addEventListener("mouseleave", function() { isDraggingM = false; });
+    
+    function updateIntersectionInfo() {
+      let intersections = countIntersections(currentM);
+      let resultDiv = document.getElementById("intersectionResults");
+      let resultText = `<strong>Прямая y = ${currentM.toFixed(2)}</strong><br>`;
+      resultText += `Количество пересечений: <strong>${intersections.length}</strong><br>`;
+      if (intersections.length > 0) {
+         resultText += `Координаты пересечений:<br>`;
+         intersections.forEach(([x, y]) => {
+            resultText += `(${x.toFixed(2)}, ${y.toFixed(2)})<br>`;
+         });
+      }
+      resultDiv.innerHTML = resultText;
+    }
+    
+    function countIntersections(m) {
+      let xMin = (-currentCenterX) / currentScale;
+      let xMax = (canvas.width - currentCenterX) / currentScale;
+      let dx = (xMax - xMin) / (canvas.width * 10);
+      let intersections = [];
+      let prevX = xMin;
+      let prevY = safeFunctionEval(prevX);
+      if (!isFinite(prevY)) {
+         prevY = getExtendedValue(prevX);
+      }
+      if (isFinite(prevY) && Math.abs(prevY - m) < 1e-2) {
+         intersections.push([prevX, prevY]);
+      }
+      for (let x = xMin + dx; x <= xMax; x += dx) {
+         let y = safeFunctionEval(x);
+         if (!isFinite(y)) {
+            y = getExtendedValue(x);
+         }
+         if (!isFinite(prevY) || !isFinite(y)) { prevX = x; prevY = y; continue; }
+         if ((prevY - m) * (y - m) < 0) {
+            let t = (m - prevY) / (y - prevY);
+            let xIntersection = prevX + t * (x - prevX);
+            let yIntersection = getExtendedValue(xIntersection);
+            intersections.push([xIntersection, yIntersection]);
+         } else if (Math.abs(y - m) < 1e-2) {
+            intersections.push([x, y]);
+         }
+         prevX = x;
+         prevY = y;
+      }
+      intersections = intersections.filter((item, index) => {
+         return intersections.findIndex(([xi]) => Math.abs(xi - item[0]) < dx * 2) === index;
+      });
+      return intersections;
+    }
+    
+    function findIntersectionsForM(m) {
+      if (!currentFunction) {
+        alert("Сначала постройте график функции.");
+        return;
+      }
+      if (m === "custom") {
+        let inputM = prompt("Введите значение m:");
+        m = parseFloat(inputM);
+        if (isNaN(m)) { alert("Неверное значение m."); return; }
+      }
+      drawHorizontalLine(m);
+      
+      let intersections = countIntersections(m);
+      
+      ctx.fillStyle = "#6495ED";
+      intersections.forEach(([x, y]) => {
+         let pixelX = currentCenterX + x * currentScale;
+         let pixelY = currentCenterY - y * currentScale;
+         let orig = safeFunctionEval(x);
+         if (!isFinite(orig)) {
+           drawHollowPoint(ctx, pixelX, pixelY, 4, 'black', 2);
+         } else {
+           ctx.beginPath();
+           ctx.arc(pixelX, pixelY, 4, 0, 2 * Math.PI);
+           ctx.fill();
+         }
+      });
+      
+      const resultDiv = document.getElementById("intersectionResults");
+      if (intersections.length === 0) {
+         resultDiv.innerHTML = "Нет точек пересечения для m = " + m;
+      } else {
+         let resultText = "Точки пересечения для m = " + m + ":<br>";
+         intersections.forEach(([x, y]) => {
+            resultText += "(" + x.toFixed(2) + ", " + y.toFixed(2) + ")<br>";
+         });
+         resultDiv.innerHTML = resultText;
+      }
+    }
+    
+    function redrawGraph() {
+      drawGrid();
+      if (!currentFunction) return;
+      ctx.beginPath();
+      ctx.strokeStyle = "#6B8E23";
+      let firstPoint = true;
+      let prevPixelY = null;
+      for (let pixelX = 0; pixelX <= canvas.width; pixelX++) {
+         let x = (pixelX - currentCenterX) / currentScale;
+         if (Math.abs(x) > 1000) { prevPixelY = null; continue; }
+         let y;
+         try { y = currentFunction(x); }
+         catch(e) { prevPixelY = null; continue; }
+         if (!isFinite(y) || Math.abs(y) > 1e6) { prevPixelY = null; continue; }
+         let pixelY = currentCenterY - y * currentScale;
+         if (prevPixelY !== null && Math.abs(pixelY - prevPixelY) > 100) {
+            ctx.moveTo(pixelX, pixelY);
+         } else {
+            if (firstPoint) { ctx.moveTo(pixelX, pixelY); firstPoint = false; }
+            else { ctx.lineTo(pixelX, pixelY); }
+         }
+         prevPixelY = pixelY;
+      }
+      ctx.stroke();
+      
+      drawHorizontalLine(currentM);
+      detectAndDrawRemovableDiscontinuities();
+    }
+    
+    function setM() {
+      let inputM = prompt("Введите значение m:");
+      let newM = parseFloat(inputM);
+      if (!isNaN(newM)) {
+         currentM = newM;
+         updateIntersectionInfo();
+         requestRedraw();
+      } else {
+         alert("Некорректное значение m.");
+      }
+    }
+    
+    function updateIntersectionInfo() {
+      let intersections = countIntersections(currentM);
+      let resultDiv = document.getElementById("intersectionResults");
+      let resultText = `<strong>Прямая y = ${currentM.toFixed(2)}</strong><br>`;
+      resultText += `Количество пересечений: <strong>${intersections.length}</strong><br>`;
+      if (intersections.length > 0) {
+         resultText += `Координаты пересечений:<br>`;
+         intersections.forEach(([x, y]) => {
+            resultText += `(${x.toFixed(2)}, ${y.toFixed(2)})<br>`;
+         });
+      }
+      resultDiv.innerHTML = resultText;
+    }
+  </script>
+</body>
+</html>
+
+    
