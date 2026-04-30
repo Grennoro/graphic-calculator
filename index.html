@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <!-- Добавлен тег viewport для мобильных устройств -->
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Графический калькулятор – Advanced Graphs</title>
-  <!-- Шрифт Poppins -->
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Общие стили */
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -40,7 +40,7 @@
     }
     .header-right nav a:hover { color: #6495ED; }
     
-    /* Основной контейнер */
+
     #container {
       display: flex;
       flex-wrap: wrap;
@@ -58,7 +58,7 @@
     #rightPanel { max-width: 350px; }
     h2, h3 { margin-top: 0; color: #3B4A58; }
     
-    /* Стили калькулятора */
+
     #calculator { margin-bottom: 10px; }
     #display {
       width: 100%;
@@ -93,7 +93,7 @@
     }
     .btn:hover { background-color: #556B2F; transform: scale(1.05); }
     
-    /* Секция кусочной функции */
+
     #piecewiseSection {
       background-color: #F7F7F7;
       border: 1px solid #708090;
@@ -127,7 +127,7 @@
     }
     .deletePiece:hover { background-color: #1E6F41; }
     
-    /* Область графика */
+
     #graphContainer {
       position: relative;
       margin: 10px;
@@ -186,7 +186,7 @@
       margin-top: 10px;
     }
     
-    /* Дополнительная информация */
+
     #infoSection {
       background-color: #fff;
       border-radius: 8px;
@@ -215,7 +215,7 @@
   </header>
   
   <div id="container">
-    <!-- Левая панель -->
+
     <div id="leftPanel">
       <div id="calculator">
         <input type="text" id="display" placeholder="Введите функцию f(x)" />
@@ -244,7 +244,7 @@
             <button class="btn" onclick="appendToDisplay(')')">)</button>
             <button class="btn" onclick="clearDisplay()">C</button>
           </div>
-          <!-- Ряд с делением -->
+
           <div class="calc-row">
             <button class="btn" onclick="appendToDisplay('/')">/</button>
           </div>
@@ -297,7 +297,7 @@
       </div>
     </div>
     
-    <!-- Правая панель -->
+
     <div id="rightPanel">
       <h2>Справочная информация</h2>
       <table>
@@ -345,7 +345,7 @@
     </div>
   </div>
   
-  <!-- Область графика -->
+
   <div id="graphContainer">
     <canvas id="graphCanvas"></canvas>
     <div id="zoomControls">
@@ -355,7 +355,7 @@
     </div>
   </div>
   
-  <!-- Дополнительная информация -->
+
   <div id="infoSection">
     <h2>О математических графиках и функциях</h2>
     <p>
@@ -399,7 +399,7 @@
   </footer>
   
   <script>
-    // Функция для отрисовки черной выколотой (hollow) точки
+
     function drawHollowPoint(ctx, x, y, radius = 4, strokeColor = 'black', lineWidth = 2) {
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
@@ -408,7 +408,7 @@
       ctx.stroke();
     }
     
-    // Безопасная оценка currentFunction(x)
+
     function safeFunctionEval(x) {
       try {
         return currentFunction(x);
@@ -417,7 +417,7 @@
       }
     }
     
-    // Получение расширённого значения функции: если основное вычисление дает NaN, пытаемся вычислить пределы слева и справа
+
     function getExtendedValue(x) {
       let y = safeFunctionEval(x);
       if (isFinite(y)) return y;
@@ -661,7 +661,7 @@
       ctx.stroke();
     }
     
-    // Обнаружение устранимых разрывов по плотной сетке с группировкой кандидатов
+
     function detectAndDrawRemovableDiscontinuities() {
       if (!currentFunction) return;
       const eps = 1e-4;
@@ -682,7 +682,7 @@
          }
       }
       
-      // Группировка кандидатов по близости
+
       candidates.sort((a, b) => a.x - b.x);
       let merged = [];
       let currentGroup = null;
@@ -709,7 +709,7 @@
       }
     }
     
-    // Поиск пересечений с прямой y = m
+
     function countIntersections(m) {
       let xMin = (-currentCenterX) / currentScale;
       let xMax = (canvas.width - currentCenterX) / currentScale;
